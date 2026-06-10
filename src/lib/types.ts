@@ -31,6 +31,7 @@ export interface MarketplaceUser {
 	phone_country_code?: string;
 	phone_number_verified?: boolean;
 	kennitala?: string;
+	license_plate?: string;
 	email?: string;
 	favorite_companies?: string[];
 	[k: string]: unknown;

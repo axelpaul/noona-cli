@@ -287,11 +287,13 @@ export class NoonaClient {
 	createEvent(body: {
 		time_slot_reservation: string;
 		company: string;
-		event_types: string[];
+		event_types: Array<string | { id: string }>;
 		starts_at: string;
 		ends_at: string;
 		employee?: string;
 		customer_name?: string;
+		ssn?: string;
+		license_plate?: string;
 		email?: string;
 		phone_number?: string;
 		phone_country_code?: string;

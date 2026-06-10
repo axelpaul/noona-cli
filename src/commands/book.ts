@@ -60,6 +60,8 @@ export async function bookCommand(flags: BookFlags): Promise<void> {
 	const me = await client.getUser().catch(() => null);
 	const customer = {
 		customer_name: flags.name ?? me?.name,
+		ssn: me?.kennitala,
+		license_plate: me?.license_plate,
 		email: flags.email ?? me?.email,
 		phone_number: flags.phone ?? me?.phone_number,
 		phone_country_code: flags.cc ?? me?.phone_country_code,
@@ -109,11 +111,13 @@ export async function bookCommand(flags: BookFlags): Promise<void> {
 	const event = await client.createEvent({
 		time_slot_reservation: reservation.id,
 		company: companyId,
-		event_types: [svc.id],
+		event_types: [{ id: svc.id }],
 		starts_at: startsAt,
 		ends_at: endsAt,
 		employee: flags.employee,
 		customer_name: customer.customer_name,
+		ssn: customer.ssn,
+		license_plate: customer.license_plate,
 		email: customer.email,
 		phone_number: customer.phone_number,
 		phone_country_code: customer.phone_country_code,

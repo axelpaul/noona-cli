@@ -122,7 +122,12 @@ const SCHEMAS: Record<string, CommandSchema> = {
 		command: "cancel",
 		mutating: true,
 		requires_auth: true,
-		shape: { cancelled: "boolean", event_id: "string", status: "string | null" },
+		shape: {
+			cancelled: "boolean",
+			event_id: "string",
+			status: "string | null",
+			verified_removed: "boolean | null  (true = confirmed gone from bookings)",
+		},
 	},
 	doctor: {
 		command: "doctor",

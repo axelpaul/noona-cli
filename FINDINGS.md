@@ -37,10 +37,9 @@ Two ways to get the JWT:
    - `POST /v1/marketplace/user/verified` `{phone_number, phone_country_code, verification_code}` → creates/verifies the user. *(public)*
 2. **Social login:** `POST /v1/marketplace/user/login` `{provider: google|apple, id_token, name}`.
 
-> ⚠️ Open question: the spec's documented `verified`/`login` **response bodies** return the user object
-> but do not show an explicit token field — the JWT is most likely delivered in a **response header**
-> (e.g. `Authorization`) or `Set-Cookie`. Confirm by running the OTP flow once with a real number and
-> dumping response headers. This is the only unverified link in the chain.
+> ✅ Verified live (phone OTP, real account): the JWT comes back in the `verified` response, and
+> `verify_phone_number` **requires** a client-generated `dispatch_id` (UUID) for the SMS to send.
+> The token is sent as the **raw** `Authorization` header value — a `Bearer ` prefix is rejected.
 
 ## Booking flow (Marketplace) — the CLI's core commands
 
@@ -57,15 +56,24 @@ Two ways to get the JWT:
 6. Manage            GET/POST /v1/marketplace/events/{event_id}    (view / reschedule / cancel; auth)
 ```
 
-**Verified live (unauthenticated):** listed companies → got an appointment company → listed its
-event_types → queried `time_slots` and received real bookable slots
-(`{date, slots:[{time, employeeIds}], status}`).
+**Verified live (full round-trip on a real account):** search → services → `time_slots`
+(`{date, slots:[{time, employeeIds, spaceIds}], status}`) → reserve → **booked** → appeared in
+`bookings` → **cancelled** (slot freed up again).
 
-### `POST /events` (create booking) — key fields
-`time_slot_reservation` (id from step 4), `company`, `event_types`, `employee`,
-`starts_at`/`ends_at`/`duration`, `number_of_guests`, customer info
-(`customer_name`, `email`, `phone_number`, `phone_country_code`, `ssn` = kennitala),
-`comment`, `booking_question_answers`.
+### `POST /events` (create booking) — key fields (verified)
+- `time_slot_reservation` (id from step 4), `company` (id string — expandable), `starts_at`/`ends_at`.
+- `event_types` must be **objects**, not bare ids: `[{ "id": "<event_type_id>" }]`. (Bare strings work
+  for the reservation step but are rejected by `POST /events`.)
+- `employee` / `space`: a slot is bound to one or the other — appointment slots carry `employeeIds`,
+  resource/table slots carry `spaceIds` (seen empty `employeeIds` + a `spaceIds` for space-based venues).
+- Customer: `customer_name`, `email`, `phone_number`, `phone_country_code`, `ssn` (= kennitala),
+  `license_plate` (vehicle-service verticals), plus `comment`, `booking_question_answers`, `number_of_guests`.
+
+### Cancel
+`POST /v1/marketplace/events/{id}` with `{ status: "cancelled" }`. The response echoes the event but
+**without a reliable `status` field** — don't gate success on it. Authoritative confirmation: the event
+drops out of `GET /events` (and its slot becomes bookable again). The CLI treats a 2xx as accepted and
+verifies removal from the list.
 
 ### Other useful endpoint groups
 Cards/Payments, Vouchers + Voucher Templates, Waitlists, Booking Offers, Recommendations/Suggestions,

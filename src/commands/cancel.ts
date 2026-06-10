@@ -38,12 +38,35 @@ export async function cancelCommand(flags: CancelFlags): Promise<void> {
 	}
 
 	const updated = await client.cancelEvent(flags.id, flags.reason);
-	if (flags.raw) return printJson(updated);
+
+	// The cancel POST returns the event but not always a usable `status`, so we
+	// don't gate success on it (that produced false "cancelled: false" reports).
+	// A 2xx (no throw) means the cancellation was accepted; confirm it
+	// authoritatively by checking the booking dropped off the active list.
+	let verifiedRemoved: boolean | null = null;
+	try {
+		const active = await client.listEvents();
+		verifiedRemoved = !active.some((e) => e.id === flags.id);
+	} catch {
+		verifiedRemoved = null; // verification call failed — fall back to the accepted POST
+	}
+	const cancelled = updated.status === "cancelled" || verifiedRemoved !== false;
+
+	if (flags.raw) return printJson({ event: updated, verified_removed: verifiedRemoved });
 	const out = {
-		cancelled: updated.status === "cancelled",
-		event_id: updated.id,
+		cancelled,
+		event_id: updated.id ?? flags.id,
 		status: updated.status ?? null,
+		verified_removed: verifiedRemoved,
 	};
 	if (json) return printJson(out);
-	console.log(color.green(`✓ Cancelled ${out.event_id} (status: ${out.status ?? "—"}).`));
+	if (cancelled) {
+		console.log(color.green(`✓ Cancelled ${out.event_id}.`));
+	} else {
+		console.log(
+			color.yellow(
+				`Cancel request sent for ${out.event_id}, but it still shows in your bookings — re-check with \`noona bookings\`.`,
+			),
+		);
+	}
 }
