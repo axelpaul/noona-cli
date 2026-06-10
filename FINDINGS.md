@@ -27,11 +27,13 @@ token**, obtained via phone-number SMS OTP or Apple/Google sign-in.
 
 ## Authentication (Marketplace)
 
-Header: `Authorization: Bearer <jwt>` (scheme `Marketplace-Authentication`, JWT bearer).
+Header: `Authorization: <jwt>` — the raw JWT as the header value, **not** prefixed
+with `Bearer ` (scheme `Marketplace-Authentication`). *(Verified against a live
+login: the `Bearer ` prefix is rejected.)*
 
 Two ways to get the JWT:
 1. **Phone OTP (best for a CLI — no Google/Apple needed):**
-   - `POST /v1/marketplace/user/verify_phone_number` `{phone_number, phone_country_code}` → sends SMS, returns `{next_retry_at}`. *(public)*
+   - `POST /v1/marketplace/user/verify_phone_number` `{phone_number, phone_country_code, dispatch_id}` → sends SMS, returns `{next_retry_at}`. `dispatch_id` is a client-generated UUID and is **required** for the SMS to dispatch. *(public)*
    - `POST /v1/marketplace/user/verified` `{phone_number, phone_country_code, verification_code}` → creates/verifies the user. *(public)*
 2. **Social login:** `POST /v1/marketplace/user/login` `{provider: google|apple, id_token, name}`.
 

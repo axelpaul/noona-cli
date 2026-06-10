@@ -3,8 +3,9 @@
 // Built from the official OpenAPI spec (reference/marketplace-openapi.yaml).
 // Base URL: https://api.noona.is
 //
-// Auth: a JWT bearer token in `Authorization: Bearer <token>` (scheme
-// "Marketplace-Authentication"). Discovery/availability reads are PUBLIC and
+// Auth: a JWT token in the raw `Authorization` header — the value is the token
+// itself, NOT prefixed with "Bearer " (scheme "Marketplace-Authentication").
+// Discovery/availability reads are PUBLIC and
 // need no token; only user-account reads and writes (the user profile, creating
 // a reservation/booking, payments, vouchers) require it.
 //
@@ -113,7 +114,7 @@ export class NoonaClient {
 			"User-Agent": USER_AGENT,
 			...extra,
 		};
-		if (this.token) h.Authorization = `Bearer ${this.token}`;
+		if (this.token) h.Authorization = this.token;
 		return h;
 	}
 
@@ -178,6 +179,7 @@ export class NoonaClient {
 		return this.post("/v1/marketplace/user/verify_phone_number", {
 			phone_number: phoneNumber,
 			phone_country_code: countryCode,
+			dispatch_id: crypto.randomUUID(),
 		});
 	}
 

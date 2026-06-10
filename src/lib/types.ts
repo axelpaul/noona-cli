@@ -6,7 +6,7 @@
 // `--raw` always has the full payload.
 
 export interface AuthState {
-	/** JWT bearer token sent as `Authorization: Bearer <token>`. */
+	/** JWT token sent as the raw `Authorization` header value (no "Bearer " prefix). */
 	token: string;
 	loggedInAt: string;
 	user?: {
