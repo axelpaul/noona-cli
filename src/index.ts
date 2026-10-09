@@ -107,6 +107,7 @@ const COMMANDS: CommandSpec[] = [
 		usage: "noona schema [<command>]",
 	},
 	{ name: "version", description: "Print the CLI version." },
+	{ name: "serve", description: "Start the read-only local MCP server over stdio." },
 ];
 
 function printHelp(): void {
@@ -143,6 +144,10 @@ async function main(): Promise<void> {
 	const raw = hasFlag("raw");
 
 	switch (command) {
+		case "serve": {
+			const { serve } = await import("./mcp/server.ts");
+			return serve();
+		}
 		case "login":
 			return loginCommand({
 				token: getFlag("token"),
