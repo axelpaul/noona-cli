@@ -11,14 +11,10 @@ metadata:
         "install":
           [
             {
-              "id": "git",
+              "id": "bun",
               "kind": "manual",
-              "label": "Clone + bun link",
-              "steps":
-                [
-                  "git clone https://github.com/axelpaul/noona-cli ~/code/noona-cli",
-                  "cd ~/code/noona-cli && bun install && bun link",
-                ],
+              "label": "Install with Bun",
+              "steps": ["bun add -g github:axelpaul/noona-cli"],
             },
           ],
       },
@@ -68,9 +64,15 @@ timezone automatically.
   non-interactive `--json` mode they refuse unless you pass `--yes`. Always show
   the user the chosen slot before passing `--yes`.
 
-## Caveat
+## MCP
 
-The login token-delivery and the reserve→confirm booking bodies are built from
-Noona's OpenAPI spec; the public discovery/availability path is verified live,
-but the authenticated booking path should be confirmed against a real account on
-first use (`--raw` shows the exact payloads). See `FINDINGS.md`.
+`noona serve` exposes the same operations as MCP tools (`search_businesses`,
+`list_services`, `list_slots`, `list_bookings`, `get_booking`, `whoami`,
+`doctor`). `create_booking` and `cancel_booking` only appear with
+`NOONA_MCP_ENABLE_WRITES=1` and need an explicit confirmation argument.
+
+## Notes
+
+Phone login, booking (reserve, then confirm) and cancellation have been
+verified against a real account. `--raw` shows the exact API payloads if
+something looks off. See `FINDINGS.md`.

@@ -85,18 +85,14 @@ Attempted, then abandoned in favor of the official spec:
 - **APK download blocked:** every mirror (APKPure, APKCombo→PureAPK, Aptoide, apkmonk) sits behind a
   Cloudflare JS challenge that `curl` can't pass. Pkg name confirmed: consumer app `com.timatorgmobile`
   ("Noona – Book anything"); business app `com.timatal.employees` (Noona HQ).
-- **Emulator blocked in this env:** the existing AVD's disk images are mode `0600` owned by another
-  user (`openclaw`); creating a fresh AVD fails because this account isn't in the `kvm` group and
-  `sudo` needs a password. (A Playwright/Chromium install succeeded and could pass Cloudflare to fetch
-  the APK if we ever want the app's exact client behavior — but the documented API makes it unnecessary.)
+- **Emulator not available** in the recon environment, so the app was not run. A headless browser
+  could get past Cloudflare to fetch the APK if the app's exact client behavior is ever needed, but
+  the documented API makes it unnecessary.
 
 The app talks to this same documented backend, so the spec is authoritative.
 
-## Recommended next steps for the CLI
+## Status
 
-1. Confirm token delivery: run the phone-OTP flow once with a real number, dump response headers.
-2. Generate a typed client from `reference/marketplace-openapi.yaml`.
-3. Implement an auth command (`login` via phone OTP) that stores the JWT locally.
-4. Implement agent-friendly commands: `search`, `services <company>`, `slots <company> <service>`,
-   `book`, `bookings`, `cancel`.
-5. Match a realistic mobile `User-Agent` on requests.
+All of the above is implemented in the CLI (`search`, `services`, `slots`, `login`, `book`,
+`bookings`, `cancel`) and in the MCP server (`noona serve`). Possible additions: rescheduling
+(`POST /events/{id}` with new times), `speedy_slots`, waitlists.
