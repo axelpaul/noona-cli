@@ -1,21 +1,10 @@
 // noona bookings — list your bookings (events), or one in full with --id. Requires auth.
 
-import { companyName } from "../lib/api.ts";
 import { dateTime } from "../lib/format.ts";
+import { companyLabel, listBookings, serviceLabels } from "../lib/ops.ts";
 import { color, isJsonMode, printJson } from "../lib/output.ts";
 import { authedClient } from "../lib/session.ts";
-import type { Company, Event, EventType } from "../lib/types.ts";
-
-function companyLabel(c: Company | string | undefined): string | null {
-	if (!c) return null;
-	if (typeof c === "string") return c;
-	return companyName(c);
-}
-
-function serviceLabels(ets: (EventType | string)[] | undefined): string[] {
-	if (!ets) return [];
-	return ets.map((e) => (typeof e === "string" ? e : (e.title ?? e.id))).filter(Boolean);
-}
+import type { Event } from "../lib/types.ts";
 
 export async function bookingsCommand(flags: {
 	id?: string;
@@ -33,20 +22,11 @@ export async function bookingsCommand(flags: {
 		return;
 	}
 
-	const events = await client.listEvents();
-	if (flags.raw) return printJson(events);
+	const { raw, result } = await listBookings(client);
+	if (flags.raw) return printJson(raw);
+	if (json) return printJson(result);
 
-	const rows = events.map((e) => ({
-		id: e.id,
-		starts_at: e.starts_at ?? null,
-		ends_at: e.ends_at ?? null,
-		status: e.status ?? null,
-		confirmed: e.confirmed ?? null,
-		company: companyLabel(e.company),
-		services: serviceLabels(e.event_types),
-	}));
-
-	if (json) return printJson({ returned: rows.length, bookings: rows });
+	const rows = result.bookings;
 	if (rows.length === 0) {
 		console.log(color.dim("No bookings."));
 		return;

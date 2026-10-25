@@ -6,15 +6,19 @@ import { color, isJsonMode, printJson } from "../lib/output.ts";
 import { currentToken } from "../lib/session.ts";
 import { loadAuth, loadConfig } from "../lib/storage.ts";
 
-type CheckStatus = "ok" | "warn" | "fail";
-interface Check {
+export type CheckStatus = "ok" | "warn" | "fail";
+export interface Check {
 	name: string;
 	status: CheckStatus;
 	detail?: string;
 }
 
 export async function doctorCommand(flags: { json?: boolean; pretty?: boolean }): Promise<void> {
-	const json = isJsonMode(flags);
+	report(await runChecks(), isJsonMode(flags));
+}
+
+/** Run the pre-flight checks without printing. Shared with the MCP `doctor` tool. */
+export async function runChecks(): Promise<Check[]> {
 	const checks: Check[] = [];
 	const cfg = loadConfig();
 	const client = new NoonaClient({ baseUrl: cfg.baseUrl, token: currentToken() });
@@ -44,7 +48,7 @@ export async function doctorCommand(flags: { json?: boolean; pretty?: boolean })
 			status: "warn",
 			detail: "No token — public commands work; `noona login` for bookings.",
 		});
-		return report(checks, json);
+		return checks;
 	}
 	checks.push({
 		name: "auth",
@@ -73,15 +77,19 @@ export async function doctorCommand(flags: { json?: boolean; pretty?: boolean })
 		});
 	}
 
-	report(checks, json);
+	return checks;
 }
 
-function report(checks: Check[], json: boolean): void {
-	const overall: CheckStatus = checks.some((c) => c.status === "fail")
+export function overallStatus(checks: Check[]): CheckStatus {
+	return checks.some((c) => c.status === "fail")
 		? "fail"
 		: checks.some((c) => c.status === "warn")
 			? "warn"
 			: "ok";
+}
+
+function report(checks: Check[], json: boolean): void {
+	const overall = overallStatus(checks);
 
 	if (json) {
 		printJson({ status: overall, checks });

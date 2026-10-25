@@ -1,6 +1,7 @@
 // noona cancel <event_id> — cancel a booking. Mutating; confirms unless --yes. Auth.
 
 import { dateTime } from "../lib/format.ts";
+import { cancelBooking } from "../lib/ops.ts";
 import { color, die, isJsonMode, printJson } from "../lib/output.ts";
 import { confirm } from "../lib/prompt.ts";
 import { authedClient } from "../lib/session.ts";
@@ -37,30 +38,10 @@ export async function cancelCommand(flags: CancelFlags): Promise<void> {
 		}
 	}
 
-	const updated = await client.cancelEvent(flags.id, flags.reason);
-
-	// The cancel POST returns the event but not always a usable `status`, so we
-	// don't gate success on it (that produced false "cancelled: false" reports).
-	// A 2xx (no throw) means the cancellation was accepted; confirm it
-	// authoritatively by checking the booking dropped off the active list.
-	let verifiedRemoved: boolean | null = null;
-	try {
-		const active = await client.listEvents();
-		verifiedRemoved = !active.some((e) => e.id === flags.id);
-	} catch {
-		verifiedRemoved = null; // verification call failed — fall back to the accepted POST
-	}
-	const cancelled = updated.status === "cancelled" || verifiedRemoved !== false;
-
-	if (flags.raw) return printJson({ event: updated, verified_removed: verifiedRemoved });
-	const out = {
-		cancelled,
-		event_id: updated.id ?? flags.id,
-		status: updated.status ?? null,
-		verified_removed: verifiedRemoved,
-	};
+	const { raw, result: out } = await cancelBooking(client, flags.id, flags.reason);
+	if (flags.raw) return printJson(raw);
 	if (json) return printJson(out);
-	if (cancelled) {
+	if (out.cancelled) {
 		console.log(color.green(`✓ Cancelled ${out.event_id}.`));
 	} else {
 		console.log(

@@ -1,4 +1,8 @@
-// Auth + config persistence in ~/.config/noona/ with 0600 perms.
+// Auth + config persistence with 0600 perms.
+//
+// Location: $NOONA_CONFIG_DIR, else $XDG_CONFIG_HOME/noona-cli, else
+// ~/.config/noona-cli. An existing legacy ~/.config/noona directory is still
+// used if the new one doesn't exist yet, so older logins keep working.
 
 import {
 	chmodSync,
@@ -13,7 +17,16 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { AuthState, UserConfig } from "./types.ts";
 
-const CONFIG_DIR = join(homedir(), ".config", "noona");
+function configDir(): string {
+	if (process.env.NOONA_CONFIG_DIR) return process.env.NOONA_CONFIG_DIR;
+	const base = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+	const dir = join(base, "noona-cli");
+	const legacy = join(homedir(), ".config", "noona");
+	if (!existsSync(dir) && existsSync(legacy)) return legacy;
+	return dir;
+}
+
+const CONFIG_DIR = configDir();
 const AUTH_PATH = join(CONFIG_DIR, "auth.json");
 const CONFIG_PATH = join(CONFIG_DIR, "config.json");
 

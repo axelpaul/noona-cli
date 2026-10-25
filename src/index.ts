@@ -15,6 +15,7 @@ import { servicesCommand } from "./commands/services.ts";
 import { slotsCommand } from "./commands/slots.ts";
 import { whoamiCommand } from "./commands/whoami.ts";
 import { ApiError, AuthError } from "./lib/api.ts";
+import { UsageError } from "./lib/ops.ts";
 import { color } from "./lib/output.ts";
 
 export const VERSION = pkg.version;
@@ -107,7 +108,11 @@ const COMMANDS: CommandSpec[] = [
 		usage: "noona schema [<command>]",
 	},
 	{ name: "version", description: "Print the CLI version." },
-	{ name: "serve", description: "Start the read-only local MCP server over stdio." },
+	{
+		name: "serve",
+		description: "Start the MCP server over stdio (writes need NOONA_MCP_ENABLE_WRITES=1).",
+		usage: "noona serve",
+	},
 ];
 
 function printHelp(): void {
@@ -231,11 +236,12 @@ main().catch((err: unknown) => {
 		process.exit(2);
 	}
 	const msg = err instanceof Error ? err.message : String(err);
+	const code = err instanceof UsageError ? 64 : 1;
 	if (globalFlags.json) {
 		const status = err instanceof ApiError ? err.status : undefined;
 		console.error(JSON.stringify({ error: msg, status }));
 	} else {
 		console.error(color.red(`Error: ${msg}`));
 	}
-	process.exit(1);
+	process.exit(code);
 });
