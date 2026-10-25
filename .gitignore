@@ -1,4 +1,6 @@
 node_modules/
+dist/
 noona
+*.tgz
 *.log
 .DS_Store

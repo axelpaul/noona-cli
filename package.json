@@ -1,29 +1,48 @@
 {
 	"name": "noona-cli",
 	"version": "0.1.0",
-	"description": "CLI for the Noona booking marketplace — search businesses, list services, find open time slots, and book/cancel appointments from your terminal. AI-agent friendly. Built with Bun.",
+	"description": "CLI and MCP server for the Noona booking marketplace: search businesses, list services, find open time slots, and book or cancel appointments. Unofficial.",
+	"license": "MIT",
+	"author": "Axel Paul Gunnarsson",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/axelpaul/noona-cli.git"
+	},
+	"homepage": "https://github.com/axelpaul/noona-cli#readme",
+	"bugs": {
+		"url": "https://github.com/axelpaul/noona-cli/issues"
+	},
+	"engines": {
+		"bun": ">=1.1.0"
+	},
 	"module": "src/index.ts",
 	"type": "module",
 	"private": true,
 	"bin": {
 		"noona": "src/index.ts"
 	},
+	"files": [
+		"src",
+		"!src/**/*.test.ts",
+		"README.md",
+		"LICENSE"
+	],
 	"scripts": {
 		"start": "bun src/index.ts",
 		"dev": "bun --watch src/index.ts",
-		"build": "bun build --compile src/index.ts --outfile noona",
+		"build": "bun build --compile src/index.ts --outfile dist/noona",
 		"typecheck": "bunx tsc --noEmit",
 		"lint": "bunx biome check src/",
 		"check": "bun run lint && bun run typecheck && bun run test",
 		"test": "bun test"
 	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.32.1",
+		"zod": "^4.6.5"
+	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.0.0",
 		"@types/bun": "latest",
 		"typescript": "^5.6.0"
-	},
-	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.32.1",
-		"zod": "^4.6.5"
 	}
 }
