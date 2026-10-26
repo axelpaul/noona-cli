@@ -1,0 +1,120 @@
+{
+  "$schema": "https://mcp.axelpaul.is/catalog.schema.json",
+  "id": "noona",
+  "repo": "axelpaul/noona-cli",
+  "name": "Noona",
+  "service": "Noona",
+  "serviceUrl": "https://noona.is",
+  "tagline": "Available appointments and bookings on Noona",
+  "description": "Find businesses on Noona, check services and prices, and search for available appointments without signing in. Sign in with an SMS code to book, view your appointments or cancel them.",
+  "examples": [
+    "Find a barber in Hafnarfjörður with an available appointment on Friday.",
+    "Are there any haircut appointments on Saturday morning?",
+    "Cancel my appointment next Tuesday."
+  ],
+  "category": "Health & booking",
+  "keywords": [
+    "klipping",
+    "hárgreiðsla",
+    "haircut",
+    "tímabókun",
+    "appointment"
+  ],
+  "auth": "none for search/services/slots; phone (SMS code) for bookings",
+  "binaries": true,
+  "tools": [
+    {
+      "name": "search_businesses",
+      "write": false,
+      "description": "Search businesses by text, location, type; public"
+    },
+    {
+      "name": "list_services",
+      "write": false,
+      "description": "Services at a business with duration and starting price; public"
+    },
+    {
+      "name": "list_slots",
+      "write": false,
+      "description": "Open time slots for a business by service/employee, up to 31 days; public"
+    },
+    {
+      "name": "list_bookings",
+      "write": false,
+      "description": "The logged-in user's bookings"
+    },
+    {
+      "name": "get_booking",
+      "write": false,
+      "description": "One booking in full by event id"
+    },
+    {
+      "name": "whoami",
+      "write": false,
+      "description": "The logged-in user's profile"
+    },
+    {
+      "name": "doctor",
+      "write": false,
+      "description": "API reachability, login and token checks"
+    },
+    {
+      "name": "create_booking",
+      "write": true,
+      "description": "Book an appointment; preview unless confirm=true"
+    },
+    {
+      "name": "cancel_booking",
+      "write": true,
+      "description": "Cancel a booking; confirmEventId must repeat eventId"
+    }
+  ],
+  "commands": [
+    "noona search <query>",
+    "noona services <company>",
+    "noona slots <company> --service <id>",
+    "noona login",
+    "noona book <company> --service <id> --at <YYYY-MM-DDTHH:MM>",
+    "noona bookings",
+    "noona cancel <event_id>",
+    "noona whoami",
+    "noona doctor",
+    "noona serve"
+  ],
+  "envVars": [
+    {
+      "name": "NOONA_TOKEN",
+      "description": "Account token (overrides the stored login)"
+    },
+    {
+      "name": "NOONA_PHONE",
+      "description": "Default phone number for login"
+    },
+    {
+      "name": "NOONA_CC",
+      "description": "Default phone country code for login (default 354)"
+    },
+    {
+      "name": "NOONA_BASE_URL",
+      "description": "Override the API base URL"
+    },
+    {
+      "name": "NOONA_CONFIG_DIR",
+      "description": "Override the config directory"
+    },
+    {
+      "name": "NOONA_MCP_ENABLE_WRITES",
+      "description": "Set to 1 to expose create_booking and cancel_booking over MCP"
+    }
+  ],
+  "writesEnvVar": "NOONA_MCP_ENABLE_WRITES",
+  "is": {
+    "tagline": "Lausir tímar og bókanir á Noona",
+    "description": "Finndu fyrirtæki á Noona, skoðaðu þjónustu og verð og leitaðu að lausum tímum án innskráningar. Skráðu þig inn með SMS-kóða til að bóka tíma, skoða bókanirnar þínar eða afbóka.",
+    "examples": [
+      "Finndu rakara í Hafnarfirði með lausan tíma á föstudaginn.",
+      "Eru lausir tímar í klippingu á laugardagsmorgun?",
+      "Afbókaðu tímann minn næsta þriðjudag."
+    ]
+  }
+}
