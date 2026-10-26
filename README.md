@@ -1,5 +1,7 @@
 # noona
 
+[MCP setup and client configuration](MCP.md)
+
 Headless, agent-friendly CLI for the **Noona** booking marketplace
 ([noona.is](https://noona.is)) — search businesses, list their services, find
 open time slots, and book / cancel appointments from your terminal.
